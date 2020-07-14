@@ -29,7 +29,7 @@ def caps(update, context):
     text_caps = ' '.join(context.args).upper()
     context.bot.send_message(chat_id=update.effective_chat.id, text=text_caps)
 
-def daily_status(day, date):
+def daily_status(day, date, planned_month, daily):
     return (
         planned_month[planned_month["transaction_time"] <= date][
             "transaction_amount"
@@ -38,13 +38,13 @@ def daily_status(day, date):
     )
 
 
-def transactions_left(day, date):
+def transactions_left(day, date, planned_month):
     return planned_month[planned_month["transaction_time"] > date][
         "transaction_amount"
     ].sum()
 
 
-def transactions_made(day, date):
+def transactions_made(day, date, planned_month):
     return planned_month[planned_month["transaction_time"] <= date][
         "transaction_amount"
     ].sum()
@@ -63,7 +63,7 @@ def recalculate_balance(update, context):
     notion_balance = "https://www.notion.so/chenchiks/2062899533a048579f572a7e3d40182f?v=1fb6c93b1a5045af9ea3a83b4aa90dd0" 
     notion_transactions = "https://www.notion.so/chenchiks/1604cc3bb0614273a690710f17b138ca?v=8f278effcac4457d803aeb5cc0a1c93e"
 
-    credit_limit = LIMIT
+    credit_limit = int(LIMIT)
     
     # get info about this month
     now = pd.Timestamp(datetime.now().timestamp(), unit="s").to_period(freq="M")
@@ -139,15 +139,15 @@ def recalculate_balance(update, context):
 
 
     monthly_chart["planned"] = monthly_chart.apply(
-        lambda row: daily_status(row["day"], row["date"]), axis=1
+        lambda row: daily_status(row["day"], row["date"], planned_month, daily), axis=1
     )
 
     monthly_chart["transactions_left"] = monthly_chart.apply(
-        lambda row: transactions_left(row["day"], row["date"]), axis=1
+        lambda row: transactions_left(row["day"], row["date"], planned_month), axis=1
     )
 
     monthly_chart["transactions_made"] = monthly_chart.apply(
-        lambda row: transactions_made(row["day"], row["date"]), axis=1
+        lambda row: transactions_made(row["day"], row["date"], planned_month), axis=1
     )
 
     monthly_chart = (
