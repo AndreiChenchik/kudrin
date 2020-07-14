@@ -17,6 +17,9 @@ def caps(update, context):
     text_caps = ' '.join(context.args).upper()
     context.bot.send_message(chat_id=update.effective_chat.id, text=text_caps)
 
+def recalculate_balance(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id,text='TBD')
+
 def main():
     updater = Updater(token=TOKEN, use_context=True)
     dp = updater.dispatcher
@@ -24,6 +27,7 @@ def main():
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
     dp.add_handler(CommandHandler('caps', caps))
+    dp.add_handler(CommandHandler('recalculate_balance', recalculate_balance))
 
     updater.start_polling()
 
